@@ -3,11 +3,16 @@ require_once 'vendor/autoload.php';
 
 header('Content-type: json/application');
 
-$hostname = 'localhost';
-$dbname = 'currencyexchange';
-$login = 'root';
-$password = '';
-$port = 3306;
+require_once 'App/Database/connectionInfo.php';
+
+/**
+ * @var  $hostname,
+ * @var  $dbname,
+ * @var  $port,
+ * @var  $login,
+ * @var  $password
+ */
+
 
 $connection = new \App\Database\Connection($hostname, $dbname, $port, $login, $password);
 
