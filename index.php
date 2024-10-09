@@ -17,6 +17,8 @@ $stmt = $connection->getPdoConnection()->query($sql);
 
 $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+
+var_dump($users[0]);
 echo json_encode($users);
 
 die($_GET['q']);
