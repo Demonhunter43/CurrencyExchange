@@ -1,3 +1,9 @@
 {
-
+  "name": "vladislav/currencye_xchange",
+  "authors": [
+    {
+      "name": "Vladislav Kuznetsov",
+      "email": "kuznetsov_vd@inbox.ru"
+    }
+  ]
 }
