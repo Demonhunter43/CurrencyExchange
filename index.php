@@ -21,4 +21,4 @@ $stmt = $pdo->query($sql);
 
 $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-var_dump($users);
+//var_dump($users);
