@@ -1,1 +1,1 @@
-REST API education
+REST API education project on pure php using PDO
