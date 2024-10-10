@@ -17,24 +17,14 @@ class Router
     public function run(): void
     {
 
-        if ($this->method === "GET" && $this->q === "currencies") {
+        if ($this->method == "GET" && $this->q === "currencies") {
             Action::showAllCurrencies();
+            return;
         }
+        $qArray = explode("/", $this->q);
 
-        if ($this->method === "GET" && ($this->q === "currencies")) {
-            Action::showCurrencyByCode();
-        }
-
-        if ($this->method === "POST") {
-            switch ($q) {
-                case ()
-            }
-        }
-
-        if ($this->method === "PATCH") {
-            switch ($q) {
-                case ()
-            }
+        if ($this->method == "GET" && ($qArray[1] === "currency")) {
+            Action::showCurrencyByCode($qArray[2]);
         }
     }
 }
