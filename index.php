@@ -13,7 +13,6 @@ require_once 'App/Database/connectionInfo.php';
  * @var  $password
  */
 
-
 $connection = new \App\Database\Connection($hostname, $dbname, $port, $login, $password);
 
 $sql = "SELECT * FROM `currencies`";
