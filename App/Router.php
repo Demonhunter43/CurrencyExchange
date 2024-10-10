@@ -2,6 +2,7 @@
 
 namespace App;
 
+// This class checks string q from URL and then returns need Action object
 class Router
 {
     private string $q;

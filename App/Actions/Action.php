@@ -1,8 +1,9 @@
 <?php
 
 namespace App\Actions;
-// Th
-class Action
+// This abstract class uses special class to get data from Database in Objects (Currency and CurrencyExchange)
+// and transform in JSON needed format.
+abstract class Action
 {
 
 }
