@@ -2,13 +2,15 @@
 
 namespace App\Objects;
 
-class CurrencyExchange
+class CurrencyExchange  implements \JsonSerializable
 {
 
-private int $id;
-private int $baseCurrencyId;
-private int $targetCurrencyId;
-private float $rate;
+    private int $id;
+    private int $baseCurrencyId;
+    private int $targetCurrencyId;
+    private float $rate;
+    private Currency $baseCurrency;
+    private Currency $targetCurrency;
 
     /**
      * @param int $baseCurrencyId
@@ -61,5 +63,21 @@ private float $rate;
     public function setRate(float $rate): void
     {
         $this->rate = $rate;
+    }
+
+    public function initializeCurrencies($baseCurrency, $targetCurrency): void
+    {
+        $this->baseCurrency = $baseCurrency;
+        $this->targetCurrency = $targetCurrency;
+    }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'id' => $this->id,
+            'baseCurrency' => $this->baseCurrency,
+            'targetCurrency' => $this->targetCurrency,
+            'rate' => $this->rate
+        ];
     }
 }

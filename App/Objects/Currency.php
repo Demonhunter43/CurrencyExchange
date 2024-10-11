@@ -26,6 +26,7 @@ class Currency implements \JsonSerializable
     {
         return $this->id;
     }
+
     public function getCode(): string
     {
         return $this->code;
