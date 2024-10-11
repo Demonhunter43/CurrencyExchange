@@ -2,7 +2,7 @@
 
 namespace App\Objects;
 
-class Currency
+class Currency implements \JsonSerializable
 {
     private int $id;
     private string $code;
@@ -42,8 +42,14 @@ class Currency
     {
         return $this->sign;
     }
-    public function __toString(): string
-    {
 
+    public function jsonSerialize(): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->fullName,
+            'code' => $this->code,
+            'sign' => $this->sign
+        ];
     }
 }
