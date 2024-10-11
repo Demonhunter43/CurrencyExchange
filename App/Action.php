@@ -16,8 +16,10 @@ class Action
         echo json_encode($arrayCurrencies);
     }
 
-    public function showCurrencyByCode()
+    public static function showCurrencyByCode(string $code):void
     {
-
+        $data = DatabaseActions::getCurrencyByCode($code);
+        $currency = DataToObjectTransformer::makeCurrencyFromData($data);
+        echo json_encode($currency);
     }
 }

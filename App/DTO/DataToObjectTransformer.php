@@ -3,6 +3,7 @@
 namespace App\DTO;
 
 use App\Objects\Currency;
+use App\Objects\CurrencyExchange;
 
 class DataToObjectTransformer
 {
@@ -10,9 +11,14 @@ class DataToObjectTransformer
     {
         $i = 0;
         foreach ($data as $currency) {
-            $arrayCurrencies[$i] = new Currency($currency["ID"], $currency["Code"], $currency["FullName"], $currency["Sign"]);
+            $arrayCurrencies[$i] = DataToObjectTransformer::makeCurrencyFromData($currency);
             $i++;
         }
         return $arrayCurrencies;
+    }
+    static function makeCurrencyFromData($data):Currency
+    {
+        $dataCurrency = $data[0];
+        return new Currency($dataCurrency["ID"], $dataCurrency["Code"], $dataCurrency["FullName"], $dataCurrency["Sign"]);
     }
 }

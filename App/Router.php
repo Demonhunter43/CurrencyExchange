@@ -22,9 +22,14 @@ class Router
             return;
         }
         $qArray = explode("/", $this->q);
-
-        if ($this->method == "GET" && ($qArray[1] === "currency")) {
-            Action::showCurrencyByCode($qArray[2]);
+        if ($this->method == "GET" && ($qArray[0] == "currency")) {
+            Action::showCurrencyByCode($qArray[1]);
+            return;
         }
+
+
+
+
+
     }
 }
