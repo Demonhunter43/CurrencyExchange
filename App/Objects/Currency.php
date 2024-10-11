@@ -4,7 +4,7 @@ namespace App\Objects;
 
 class Currency implements \JsonSerializable
 {
-    private int $id;
+    private ?int $id;
     private string $code;
     private string $fullName;
     private string $sign;
@@ -14,7 +14,7 @@ class Currency implements \JsonSerializable
      * @param string $fullName
      * @param string $sign
      */
-    public function __construct(int $id, string $code, string $fullName, string $sign)
+    public function __construct(?int $id, string $code, string $fullName, string $sign)
     {
         $this->id = $id;
         $this->code = $code;

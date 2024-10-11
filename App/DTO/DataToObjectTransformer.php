@@ -16,9 +16,8 @@ class DataToObjectTransformer
         }
         return $arrayCurrencies;
     }
-    static function makeCurrencyFromData($data):Currency
+    static function makeCurrencyFromData($dataCurrency):Currency
     {
-        $dataCurrency = $data[0];
         return new Currency($dataCurrency["ID"], $dataCurrency["Code"], $dataCurrency["FullName"], $dataCurrency["Sign"]);
     }
 }

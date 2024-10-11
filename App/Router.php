@@ -8,28 +8,42 @@ class Router
     private string $q;
     private string $method;
 
-    public function __construct(string $q, string $method)
+    public function __construct()
     {
-        $this->q = $q;
-        $this->method = $method;
+        $this->q = $_GET['q'];
+        $this->method = $_SERVER['REQUEST_METHOD'];
     }
 
     public function run(): void
     {
-
-        if ($this->method == "GET" && $this->q === "currencies") {
+        // GET /currencies
+        if ($this->method === "GET" && $this->q === "currencies") {
             Action::showAllCurrencies();
-            return;
+            exit();
         }
+        // POST /currencies
+        if ($this->method === "POST" && $this->q === "currencies") {
+            Action::addCurrency($_REQUEST);
+            exit();
+        }
+
+        // With     sign / in URL
+
         $qArray = explode("/", $this->q);
-        if ($this->method == "GET" && ($qArray[0] == "currency")) {
+
+        // GET /currency/EUR
+        if ($this->method === "GET" && ($qArray[0] === "currency")) {
             Action::showCurrencyByCode($qArray[1]);
-            return;
+            exit();
         }
 
 
 
 
+        if ($this->method === "POST" && ($qArray[0] === "currencies")) {
+            Action::showCurrencyByCode($qArray[1]);
+            exit();
+        }
 
     }
 }
