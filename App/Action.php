@@ -21,7 +21,8 @@ class Action
     {
         $databaseAction = new DatabaseAction();
         $data = $databaseAction->getCurrencyByCode($code);
-        $currency = DataToObjectTransformer::makeCurrencyFromData($data[0]);
+        $data = $data[0];
+        $currency = DataToObjectTransformer::makeCurrencyFromData($data);
         echo json_encode($currency);
     }
 
@@ -35,7 +36,8 @@ class Action
 
         if ($databaseAction->addCurrency($newCurrency)) {
             $data = $databaseAction->getCurrencyByCode($code);
-            $currency = DataToObjectTransformer::makeCurrencyFromData($data[0]);
+            $data = $data[0];
+            $currency = DataToObjectTransformer::makeCurrencyFromData($data);
             echo json_encode($currency);
         }
     }
