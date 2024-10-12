@@ -33,6 +33,11 @@ class Router
             Action::showAllExchangeRates();
             exit();
         }
+        //POST /exchangeRates
+        if ($this->httpMethod === "POST" && $this->q === "exchangeRates") {
+            Action::addExchangeRate($this->httpRequest);
+            exit();
+        }
 
 
         // With     sign / in URL
@@ -47,6 +52,5 @@ class Router
             Action::showExchangeRateByCodes($qArray[1]);
             exit();
         }
-
     }
 }

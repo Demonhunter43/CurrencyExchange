@@ -78,4 +78,8 @@ class Action
 
         echo json_encode($exchangeRate);
     }
+    public static function addExchangeRate(): void
+    {
+
+    }
 }
