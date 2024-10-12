@@ -23,7 +23,8 @@ class DatabaseAction
 
     public function getCurrencyByCode($code): array
     {
-        $sql = "SELECT * FROM `currencies` WHERE `Code` = :code";
+        $sql = "SELECT * FROM `currencies`
+                WHERE `Code` = :code";
         $stmt = $this->connection->getPdo()->prepare($sql);
         $stmt->execute([
             'code' => $code
@@ -43,7 +44,8 @@ class DatabaseAction
         $code = $currency->getCode();
         $fullName = $currency->getFullName();
         $sign = $currency->getSign();
-        $sql = "INSERT INTO `currencies` (ID, Code, FullName, Sign) VALUES (null, :code, :fullName, :sign)";
+        $sql = "INSERT INTO `currencies` 
+                (ID, Code, FullName, Sign) VALUES (null, :code, :fullName, :sign)";
 
         $stmt = $this->connection->getPdo()->prepare($sql);
         $stmt->execute([
@@ -59,5 +61,18 @@ class DatabaseAction
         $sql = "SELECT * FROM `exchangerates`";
         $stmt = $this->connection->getPdo()->query($sql);
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    public function getExchangeRateByCurrenciesID(int $baseCurrencyID, int $targetCurrencyID): array
+    {
+        $sql = "SELECT * FROM `exchangerates` 
+                WHERE BaseCurrencyId = :baseCurrencyID AND TargetCurrencyId = :targetCurrencyID";
+
+        $stmt = $this->connection->getPdo()->prepare($sql);
+        $stmt->execute([
+            'baseCurrencyID' => $baseCurrencyID,
+            'targetCurrencyID' => $targetCurrencyID
+        ]);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC)[0];
     }
 }

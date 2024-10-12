@@ -43,9 +43,8 @@ class Router
             exit();
         }
 
-
-        if ($this->httpMethod === "POST" && ($qArray[0] === "currencies")) {
-            Action::showCurrencyByCode($qArray[1]);
+        if ($this->httpMethod === "GET" && ($qArray[0] === "exchangeRates")) {
+            Action::showExchangeRateByCodes($qArray[1]);
             exit();
         }
 
