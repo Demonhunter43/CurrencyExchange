@@ -26,6 +26,11 @@ class Router
             Action::addCurrency($_REQUEST);
             exit();
         }
+        //GET /exchangeRates
+        if ($this->method === "GET" && $this->q === "exchangeRates") {
+            Action::showAllExchangeRates();
+            exit();
+        }
 
         // With     sign / in URL
 

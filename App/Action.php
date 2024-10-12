@@ -21,7 +21,6 @@ class Action
     {
         $databaseAction = new DatabaseAction();
         $data = $databaseAction->getCurrencyByCode($code);
-        $data = $data[0];
         $currency = DataToObjectTransformer::makeCurrencyFromData($data);
         echo json_encode($currency);
     }
@@ -36,9 +35,26 @@ class Action
 
         if ($databaseAction->addCurrency($newCurrency)) {
             $data = $databaseAction->getCurrencyByCode($code);
-            $data = $data[0];
             $currency = DataToObjectTransformer::makeCurrencyFromData($data);
             echo json_encode($currency);
         }
+    }
+
+    public static function showAllExchangeRates(): void
+    {
+        $databaseAction = new DatabaseAction();
+        $data = $databaseAction->getAllExchangeRates();
+        $arrayExchangeRates = DataToObjectTransformer::makeExchangeRatesArrayFromData($data);
+        foreach ($arrayExchangeRates as $exchangeRate) {
+
+            $data = $databaseAction->getCurrencyByID($exchangeRate->getBaseCurrencyId());
+            $baseCurrency = DataToObjectTransformer::makeCurrencyFromData($data);
+
+            $data = $databaseAction->getCurrencyByID($exchangeRate->getTargetCurrencyId());
+            $targetCurrency = DataToObjectTransformer::makeCurrencyFromData($data);
+
+            $exchangeRate->initializeCurrencies($baseCurrency, $targetCurrency);
+        }
+        echo json_encode($arrayExchangeRates);
     }
 }

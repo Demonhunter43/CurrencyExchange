@@ -65,7 +65,7 @@ class CurrencyExchange  implements \JsonSerializable
         $this->rate = $rate;
     }
 
-    public function initializeCurrencies($baseCurrency, $targetCurrency): void
+    public function initializeCurrencies(Currency $baseCurrency, Currency $targetCurrency): void
     {
         $this->baseCurrency = $baseCurrency;
         $this->targetCurrency = $targetCurrency;
