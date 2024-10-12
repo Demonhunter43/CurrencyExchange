@@ -46,7 +46,6 @@ class Action
         $data = $databaseAction->getAllExchangeRates();
         $arrayExchangeRates = DataToObjectTransformer::makeExchangeRatesArrayFromData($data);
         foreach ($arrayExchangeRates as $exchangeRate) {
-
             $data = $databaseAction->getCurrencyByID($exchangeRate->getBaseCurrencyId());
             $baseCurrency = DataToObjectTransformer::makeCurrencyFromData($data);
 

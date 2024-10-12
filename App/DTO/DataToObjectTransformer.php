@@ -7,7 +7,7 @@ use App\Objects\CurrencyExchange;
 
 class DataToObjectTransformer
 {
-    static function makeCurrenciesArrayFromData($data):array
+    static function makeCurrenciesArrayFromData($data): array
     {
         $i = 0;
         foreach ($data as $currency) {
@@ -16,11 +16,13 @@ class DataToObjectTransformer
         }
         return $arrayCurrencies;
     }
-    static function makeCurrencyFromData($dataCurrency):Currency
+
+    static function makeCurrencyFromData($dataCurrency): Currency
     {
         return new Currency($dataCurrency["ID"], $dataCurrency["Code"], $dataCurrency["FullName"], $dataCurrency["Sign"]);
     }
-    static function makeExchangeRatesArrayFromData($data):array
+
+    static function makeExchangeRatesArrayFromData($data): array
     {
         $i = 0;
         foreach ($data as $exchangeRate) {
@@ -29,7 +31,8 @@ class DataToObjectTransformer
         }
         return $arrayExchangeRates;
     }
-    static function makeExchangeRateFromData($dataExchangeRate):CurrencyExchange
+
+    static function makeExchangeRateFromData($dataExchangeRate): CurrencyExchange
     {
         return new CurrencyExchange($dataExchangeRate["ID"], $dataExchangeRate["BaseCurrencyId"], $dataExchangeRate["TargetCurrencyId"], $dataExchangeRate["Rate"]);
     }

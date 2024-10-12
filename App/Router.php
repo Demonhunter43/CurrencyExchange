@@ -6,46 +6,45 @@ namespace App;
 class Router
 {
     private string $q;
-    private string $method;
+    private string $httpMethod;
+    private array $httpRequest;
 
     public function __construct()
     {
         $this->q = $_GET['q'];
-        $this->method = $_SERVER['REQUEST_METHOD'];
+        $this->httpMethod = $_SERVER['REQUEST_METHOD'];
+        $this->httpRequest = $_REQUEST;
     }
 
     public function run(): void
     {
         // GET /currencies
-        if ($this->method === "GET" && $this->q === "currencies") {
+        if ($this->httpMethod === "GET" && $this->q === "currencies") {
             Action::showAllCurrencies();
             exit();
         }
         // POST /currencies
-        if ($this->method === "POST" && $this->q === "currencies") {
-            Action::addCurrency($_REQUEST);
+        if ($this->httpMethod === "POST" && $this->q === "currencies") {
+            Action::addCurrency($this->httpRequest);
             exit();
         }
         //GET /exchangeRates
-        if ($this->method === "GET" && $this->q === "exchangeRates") {
+        if ($this->httpMethod === "GET" && $this->q === "exchangeRates") {
             Action::showAllExchangeRates();
             exit();
         }
 
+
         // With     sign / in URL
-
         $qArray = explode("/", $this->q);
-
         // GET /currency/EUR
-        if ($this->method === "GET" && ($qArray[0] === "currency")) {
+        if ($this->httpMethod === "GET" && ($qArray[0] === "currency")) {
             Action::showCurrencyByCode($qArray[1]);
             exit();
         }
 
 
-
-
-        if ($this->method === "POST" && ($qArray[0] === "currencies")) {
+        if ($this->httpMethod === "POST" && ($qArray[0] === "currencies")) {
             Action::showCurrencyByCode($qArray[1]);
             exit();
         }
