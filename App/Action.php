@@ -17,9 +17,11 @@ class Action
         echo json_encode($arrayCurrencies);
     }
 
-    public static function showCurrencyByCode(string $code): void
+    public static function showCurrencyByCode(string $code, DatabaseAction $databaseAction = null): void
     {
-        $databaseAction = new DatabaseAction();
+        if (is_null($databaseAction)) {
+            $databaseAction = new DatabaseAction();
+        }
         $data = $databaseAction->getCurrencyByCode($code);
         $currency = DataToObjectTransformer::makeCurrencyFromData($data);
         echo json_encode($currency);
@@ -34,9 +36,7 @@ class Action
         $newCurrency = new Currency(null, $code, $fullName, $sign);
 
         if ($databaseAction->addCurrency($newCurrency)) {
-            $data = $databaseAction->getCurrencyByCode($code);
-            $currency = DataToObjectTransformer::makeCurrencyFromData($data);
-            echo json_encode($currency);
+            Action::showCurrencyByCode($code, $databaseAction);
         }
     }
 
