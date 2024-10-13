@@ -3,7 +3,7 @@
 namespace App\Database;
 
 use App\Objects\Currency;
-use App\Objects\CurrencyExchange;
+use App\Objects\ExchangeRate;
 
 class DatabaseAction
 {
@@ -74,5 +74,22 @@ class DatabaseAction
             'targetCurrencyID' => $targetCurrencyID
         ]);
         return $stmt->fetchAll(\PDO::FETCH_ASSOC)[0];
+    }
+
+    public function addExchangeRate(ExchangeRate $exchangeRate): bool
+    {
+        $baseCurrencyId = $exchangeRate->getBaseCurrencyId();
+        $targetCurrencyId = $exchangeRate->getTargetCurrencyId();
+        $rate = $exchangeRate->getRate();
+        $sql = "INSERT INTO `exchangerates` 
+                (ID, BaseCurrencyId, TargetCurrencyId, Rate) VALUES (null, :baseCurrencyId, :targetCurrencyId, :rate)";
+
+        $stmt = $this->connection->getPdo()->prepare($sql);
+        $stmt->execute([
+            'baseCurrencyId' => $baseCurrencyId,
+            'targetCurrencyId' => $targetCurrencyId,
+            'rate' => $rate
+        ]);
+        return true;
     }
 }

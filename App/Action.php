@@ -6,6 +6,7 @@ use App\Database\Connection;
 use App\Database\DatabaseAction;
 use App\DTO\DataToObjectTransformer;
 use App\Objects\Currency;
+use App\Objects\ExchangeRate;
 
 class Action
 {
@@ -72,14 +73,33 @@ class Action
         $targetCurrency = DataToObjectTransformer::makeCurrencyFromData($data);
 
         $data = $databaseAction->getExchangeRateByCurrenciesID($baseCurrency->getId(), $targetCurrency->getId());
-
         $exchangeRate = DataToObjectTransformer::makeExchangeRateFromData($data);
+
         $exchangeRate->initializeCurrencies($baseCurrency, $targetCurrency);
 
         echo json_encode($exchangeRate);
     }
-    public static function addExchangeRate(): void
+    public static function addExchangeRate(array $postData): void
     {
+        $databaseAction = new DatabaseAction();
+        $baseCurrencyCode = $postData["baseCurrencyCode"];
+        $targetCurrencyCode = $postData["targetCurrencyCode"];
+        $rate = $postData["rate"];
 
+        $data = $databaseAction->getCurrencyByCode($baseCurrencyCode);
+        $baseCurrency = DataToObjectTransformer::makeCurrencyFromData($data);
+
+        $data = $databaseAction->getCurrencyByCode($targetCurrencyCode);
+        $targetCurrency = DataToObjectTransformer::makeCurrencyFromData($data);
+
+        $newExchangeRate = new ExchangeRate(null, $baseCurrency->getId(), $targetCurrency->getId(), $rate);
+
+        if ($databaseAction->addExchangeRate($newExchangeRate)) {
+            $data = $databaseAction->getExchangeRateByCurrenciesID($baseCurrency->getId(), $targetCurrency->getId());
+            $exchangeRate = DataToObjectTransformer::makeExchangeRateFromData($data);
+
+            $exchangeRate->initializeCurrencies($baseCurrency, $targetCurrency);
+            echo json_encode($exchangeRate);
+        }
     }
 }

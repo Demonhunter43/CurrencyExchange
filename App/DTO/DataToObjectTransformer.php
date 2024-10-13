@@ -3,7 +3,7 @@
 namespace App\DTO;
 
 use App\Objects\Currency;
-use App\Objects\CurrencyExchange;
+use App\Objects\ExchangeRate;
 
 class DataToObjectTransformer
 {
@@ -32,8 +32,8 @@ class DataToObjectTransformer
         return $arrayExchangeRates;
     }
 
-    static function makeExchangeRateFromData($dataExchangeRate): CurrencyExchange
+    static function makeExchangeRateFromData($dataExchangeRate): ExchangeRate
     {
-        return new CurrencyExchange($dataExchangeRate["ID"], $dataExchangeRate["BaseCurrencyId"], $dataExchangeRate["TargetCurrencyId"], $dataExchangeRate["Rate"]);
+        return new ExchangeRate($dataExchangeRate["ID"], $dataExchangeRate["BaseCurrencyId"], $dataExchangeRate["TargetCurrencyId"], $dataExchangeRate["Rate"]);
     }
 }

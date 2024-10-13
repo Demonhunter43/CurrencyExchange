@@ -2,10 +2,10 @@
 
 namespace App\Objects;
 
-class CurrencyExchange  implements \JsonSerializable
+class ExchangeRate  implements \JsonSerializable
 {
 
-    private int $id;
+    private ?int $id;
     private int $baseCurrencyId;
     private int $targetCurrencyId;
     private float $rate;
@@ -17,7 +17,7 @@ class CurrencyExchange  implements \JsonSerializable
      * @param int $targetCurrencyId
      * @param float $rate
      */
-    public function __construct(int $id, int $baseCurrencyId, int $targetCurrencyId, float $rate)
+    public function __construct(?int $id, int $baseCurrencyId, int $targetCurrencyId, float $rate)
     {
         $this->id = $id;
         $this->baseCurrencyId = $baseCurrencyId;
