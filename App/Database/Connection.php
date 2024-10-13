@@ -5,6 +5,7 @@ namespace App\Database;
 class Connection
 {
     private \PDO $pdoConnection;
+
     public function __construct()
     {
         require 'connectionInfo.php';
@@ -16,11 +17,7 @@ class Connection
          * @var  $login ,
          * @var  $password
          */
-        try {
-            $this->pdoConnection = new \PDO("mysql:host=$hostname;dbname=$dbname;port=$port;",$login,$password);
-        } catch (PDOException $exception){
-            var_dump($exception->getMessage());
-        }
+        $this->pdoConnection = new \PDO("mysql:host=$hostname;dbname=$dbname;port=$port;", $login, $password);
     }
 
     /**

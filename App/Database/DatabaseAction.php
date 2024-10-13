@@ -11,8 +11,18 @@ class DatabaseAction
 
     public function __construct()
     {
-        $this->connection = new Connection();
     }
+
+    public function connect(): DatabaseResponse
+    {
+        try {
+            $this->connection = new Connection();
+        } catch (\PDOException $exception) {
+            return new DatabaseResponse(500, "Can't connect to DB");
+        }
+        return new DatabaseResponse(200);
+    }
+
 
     public function getAllCurrencies(): array
     {
