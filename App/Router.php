@@ -20,22 +20,26 @@ class Router
     {
         // GET /currencies
         if ($this->httpMethod === "GET" && $this->q === "currencies") {
-            Action::showAllCurrencies();
+            $httpResponse = Action::showAllCurrencies();
+            $httpResponse->sendJSON();
             exit();
         }
         // POST /currencies
         if ($this->httpMethod === "POST" && $this->q === "currencies") {
-            Action::addCurrency($this->httpRequest);
+            $httpResponse = Action::addCurrency($this->httpRequest);
+            $httpResponse->sendJSON();
             exit();
         }
         //GET /exchangeRates
         if ($this->httpMethod === "GET" && $this->q === "exchangeRates") {
-            Action::showAllExchangeRates();
+            $httpResponse = Action::showAllExchangeRates();
+            $httpResponse->sendJSON();
             exit();
         }
         //POST /exchangeRates
         if ($this->httpMethod === "POST" && $this->q === "exchangeRates") {
-            Action::addExchangeRate($this->httpRequest);
+            $httpResponse = Action::addExchangeRate($this->httpRequest);
+            $httpResponse->sendJSON();
             exit();
         }
 
@@ -44,12 +48,14 @@ class Router
         $qArray = explode("/", $this->q);
         // GET /currency/EUR
         if ($this->httpMethod === "GET" && ($qArray[0] === "currency")) {
-            Action::showCurrencyByCode($qArray[1]);
+            $httpResponse = Action::showCurrencyByCode($qArray[1]);
+            $httpResponse->sendJSON();
             exit();
         }
 
         if ($this->httpMethod === "GET" && ($qArray[0] === "exchangeRates")) {
-            Action::showExchangeRateByCodes($qArray[1]);
+            $httpResponse = Action::showExchangeRateByCodes($qArray[1]);
+            $httpResponse->sendJSON();
             exit();
         }
     }

@@ -4,32 +4,32 @@ namespace App\Database;
 
 class DatabaseResponse
 {
-    private ?string $data;
+    private ?object $data; //TODO Need to do array
     private int $code;
+    private ?string $errorMessage;
 
-    /**
-     * @param ?string $data
-     * @param int $code
-     */
-    public function __construct(int $code, string $data = null)
+
+    public function __construct(int $code, ?object $data = null, string $errorMessage = null)
     {
         $this->data = $data;
         $this->code = $code;
-    }
-    public function isSuccess(): bool
-    {
-        if ($this->code === 200 || $this->code === 201){
-            return true;
-        }
-        return false;
+        $this->errorMessage = $errorMessage;
     }
 
-    public function getData(): string
+    public function isNotSuccess(): bool
+    {
+        if ($this->code === 200 || $this->code === 201) {
+            return false;
+        }
+        return true;
+    }
+
+    public function getData(): ?object
     {
         return $this->data;
     }
 
-    public function setData(string $data): void
+    public function setData(?object $data): void
     {
         $this->data = $data;
     }
@@ -42,6 +42,16 @@ class DatabaseResponse
     public function setCode(int $code): void
     {
         $this->code = $code;
+    }
+
+    public function getErrorMessage(): ?string
+    {
+        return $this->errorMessage;
+    }
+
+    public function setErrorMessage(?string $errorMessage): void
+    {
+        $this->errorMessage = $errorMessage;
     }
 
 }

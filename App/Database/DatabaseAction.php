@@ -18,7 +18,7 @@ class DatabaseAction
         try {
             $this->connection = new Connection();
         } catch (\PDOException $exception) {
-            return new DatabaseResponse(500, "Can't connect to DB");
+            return new DatabaseResponse(500, null, "Can't connect to DB");
         }
         return new DatabaseResponse(200);
     }
