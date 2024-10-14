@@ -38,7 +38,7 @@ class Action
         }
         $data = $databaseAction->getCurrencyByCode($code);
         $currency = DataToObjectTransformer::makeCurrencyFromData($data);
-        return new HttpResponse(200, $currency);
+        return new HttpResponse(200, ["0" => $currency]);
     }
 
     public static function addCurrency(array $postData): HttpResponse
@@ -105,7 +105,7 @@ class Action
 
         $exchangeRate->initializeCurrencies($baseCurrency, $targetCurrency);
 
-        return new HttpResponse(200, $exchangeRate);
+        return new HttpResponse(200, ["0" => $exchangeRate]);
     }
 
     public static function addExchangeRate(array $postData): HttpResponse
@@ -133,6 +133,6 @@ class Action
 
             $exchangeRate->initializeCurrencies($baseCurrency, $targetCurrency);
         }
-        return new HttpResponse(201, $exchangeRate);
+        return new HttpResponse(201, ["0" => $exchangeRate]);
     }
 }

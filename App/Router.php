@@ -3,6 +3,8 @@
 namespace App;
 
 // This class checks string q from URL and then uses needed Action function
+use App\Http\HttpResponse;
+
 class Router
 {
     private string $q;
@@ -58,5 +60,9 @@ class Router
             $httpResponse->sendJSON();
             exit();
         }
+
+
+        $httpResponse = new HttpResponse(400,null, "Wrong URL");
+        $httpResponse->sendJSON();
     }
 }
