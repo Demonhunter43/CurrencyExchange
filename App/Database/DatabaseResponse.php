@@ -9,7 +9,7 @@ class DatabaseResponse
     private ?string $errorMessage;
 
 
-    public function __construct(int $code, ?array $data = null, string $errorMessage = null)
+    public function __construct(int $code, ?array $data = null, ?string $errorMessage = null)
     {
         $this->data = $data;
         $this->code = $code;

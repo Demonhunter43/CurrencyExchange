@@ -68,7 +68,21 @@ class DatabaseAction
 
     public function getAllExchangeRates(): array
     {
-        $sql = "SELECT * FROM `exchangerates`";
+        $sql = "SELECT  exchangerates.ID,
+                        BaseCurrency.ID AS BaseCurrencyID,
+                        BaseCurrency.Code AS BaseCurrencyCode,
+                        BaseCurrency.FullName AS BaseCurrencyFullName,
+                        BaseCurrency.Sign AS BaseCurrencySign,
+                        TargetCurrency.ID AS TargetCurrencyID,
+                        TargetCurrency.Code AS TargetCurrencyCode,
+                        TargetCurrency.FullName AS TargetCurrencyFullName,
+                        TargetCurrency.Sign AS TargetCurrencySign,
+                        exchangerates.Rate
+                FROM `exchangerates`
+                JOIN `currencies` AS BaseCurrency
+                ON BaseCurrency.ID = exchangerates.BaseCurrencyID    
+                JOIN `currencies` AS TargetCurrency
+                ON TargetCurrency.ID = exchangerates.TargetCurrencyID;";
         $stmt = $this->connection->getPdo()->query($sql);
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
@@ -82,6 +96,32 @@ class DatabaseAction
         $stmt->execute([
             'baseCurrencyID' => $baseCurrencyID,
             'targetCurrencyID' => $targetCurrencyID
+        ]);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC)[0];
+    }
+
+    public function getExchangeRateByCurrenciesCodes(string $baseCurrencyCode, string $targetCurrencyCode): array
+    {
+        $sql = "SELECT  exchangerates.ID,
+                        BaseCurrency.ID AS BaseCurrencyID,
+                        BaseCurrency.Code AS BaseCurrencyCode,
+                        BaseCurrency.FullName AS BaseCurrencyFullName,
+                        BaseCurrency.Sign AS BaseCurrencySign,
+                        TargetCurrency.ID AS TargetCurrencyID,
+                        TargetCurrency.Code AS TargetCurrencyCode,
+                        TargetCurrency.FullName AS TargetCurrencyFullName,
+                        TargetCurrency.Sign AS TargetCurrencySign,
+                        exchangerates.Rate
+                FROM `exchangerates`
+                JOIN `currencies` AS BaseCurrency
+                ON BaseCurrency.ID = exchangerates.BaseCurrencyID    
+                JOIN `currencies` AS TargetCurrency
+                ON TargetCurrency.ID = exchangerates.TargetCurrencyID
+                WHERE BaseCurrency.Code = :baseCurrencyCode AND TargetCurrency.Code = :targetCurrencyCode";
+        $stmt = $this->connection->getPdo()->prepare($sql);
+        $stmt->execute([
+            'baseCurrencyCode' => $baseCurrencyCode,
+            'targetCurrencyCode' => $targetCurrencyCode
         ]);
         return $stmt->fetchAll(\PDO::FETCH_ASSOC)[0];
     }
@@ -101,5 +141,20 @@ class DatabaseAction
             'rate' => $rate
         ]);
         return true;
+    }
+
+    public function patchExchangeRate(ExchangeRate $exchangeRate): DatabaseResponse
+    {
+        $exchangeRateId = $exchangeRate->getId();
+        $newRate = $exchangeRate->getRate();
+        $sql = "UPDATE `exchangerates` 
+                SET Rate = :newRate
+                WHERE ID = :exchangeRateId";
+        $stmt = $this->connection->getPdo()->prepare($sql);
+        $stmt->execute([
+            'newRate' => $newRate,
+            'exchangeRateId' => $exchangeRateId
+        ]);
+        return new DatabaseResponse(200);
     }
 }

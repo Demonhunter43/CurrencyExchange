@@ -25,15 +25,17 @@ class DataToObjectTransformer
     static function makeExchangeRatesArrayFromData($data): array
     {
         $i = 0;
-        foreach ($data as $exchangeRate) {
-            $arrayExchangeRates[$i] = DataToObjectTransformer::makeExchangeRateFromData($exchangeRate);
+        foreach ($data as $dataExchangeRate) {
+            $arrayExchangeRates[$i] = DataToObjectTransformer::makeExchangeRateFromData($dataExchangeRate);
             $i++;
         }
         return $arrayExchangeRates;
     }
 
-    static function makeExchangeRateFromData($dataExchangeRate): ExchangeRate
+    static function makeExchangeRateFromData(array $dataExchangeRate): ExchangeRate
     {
-        return new ExchangeRate($dataExchangeRate["ID"], $dataExchangeRate["BaseCurrencyId"], $dataExchangeRate["TargetCurrencyId"], $dataExchangeRate["Rate"]);
+        $baseCurrency = new Currency($dataExchangeRate["BaseCurrencyID"],$dataExchangeRate["BaseCurrencyCode"],$dataExchangeRate["BaseCurrencyFullName"],$dataExchangeRate["BaseCurrencySign"]); //TODO Currencies constructor, Exchange constructor и переделать везде, где есть этотметод
+        $targetCurrency = new Currency($dataExchangeRate["TargetCurrencyID"],$dataExchangeRate["TargetCurrencyCode"],$dataExchangeRate["TargetCurrencyFullName"],$dataExchangeRate["TargetCurrencySign"]);
+        return new ExchangeRate($dataExchangeRate["ID"],$baseCurrency, $targetCurrency, $dataExchangeRate["Rate"]);
     }
 }

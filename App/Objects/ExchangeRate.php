@@ -12,17 +12,15 @@ class ExchangeRate  implements \JsonSerializable
     private Currency $baseCurrency;
     private Currency $targetCurrency;
 
-    /**
-     * @param int $baseCurrencyId
-     * @param int $targetCurrencyId
-     * @param float $rate
-     */
-    public function __construct(?int $id, int $baseCurrencyId, int $targetCurrencyId, float $rate)
+
+    public function __construct(?int $id, Currency $baseCurrency, Currency $targetCurrency, float $rate)
     {
         $this->id = $id;
-        $this->baseCurrencyId = $baseCurrencyId;
-        $this->targetCurrencyId = $targetCurrencyId;
+        $this->baseCurrency = $baseCurrency;
+        $this->targetCurrency = $targetCurrency;
         $this->rate = $rate;
+        $this->baseCurrencyId = $baseCurrency->getId();
+        $this->targetCurrencyId = $targetCurrency->getId();
     }
 
     public function getId(): int
