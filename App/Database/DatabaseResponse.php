@@ -23,6 +23,13 @@ class DatabaseResponse
         }
         return true;
     }
+    public function isSuccess(): bool
+    {
+        if ($this->code === 200 || $this->code === 201) {
+            return true;
+        }
+        return false;
+    }
 
     public function getData(): ?array
     {

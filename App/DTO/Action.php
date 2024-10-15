@@ -119,4 +119,18 @@ class Action
         return new HttpResponse(200, ["0" => $exchangeRate]);
     }
 
+    public static function getExchange(string $baseCurrencyCode, string $targetCurrencyCode, float $amount): HttpResponse
+    {
+        $databaseAction = new DatabaseAction();
+        $databaseResponse = $databaseAction->connect();
+        if ($databaseResponse->isNotSuccess()) {
+            return new HttpResponse($databaseResponse->getCode(), null, $databaseResponse->getErrorMessage());
+        }
+        $databaseResponse = ..
+        if ($databaseResponse->isSuccess()){
+
+        }
+        $dataExchangeRate = $databaseAction->getExchangeRateByCurrenciesCodes($baseCurrencyCode, $targetCurrencyCode);
+        $exchangeRate = DataToObjectTransformer::makeExchangeRateFromData($dataExchangeRate);
+    }
 }
