@@ -8,19 +8,28 @@ use App\Http\HttpResponse;
 
 class Router
 {
-    private string $q;
+    private ?string $q;
     private string $httpMethod;
-    private array $httpRequest;
+    private array $postBody;
 
     public function __construct()
     {
-        $this->q = $_GET['q'];
+        if (array_key_exists('q', $_GET)) {
+            $this->q = $_GET['q'];
+        } else {
+            $this->q = null;
+        }
         $this->httpMethod = $_SERVER['REQUEST_METHOD'];
-        $this->httpRequest = $_REQUEST;
+        $this->postBody = $_REQUEST;
     }
 
     public function run(): void
     {
+        if (is_null($this->q)) {
+            $httpResponse = new HttpResponse(404, null, "Wrong URL");
+            $httpResponse->sendJSON();
+            exit();
+        }
 
         // GET /currencies
         if ($this->httpMethod === "GET" && $this->q === "currencies") {
@@ -31,13 +40,18 @@ class Router
         // POST /currencies
         if ($this->httpMethod === "POST" && $this->q === "currencies") {
             // Checking for wrong Body
-            if (array_key_exists("name", $this->httpRequest)
-                && array_key_exists("code", $this->httpRequest)
-                && array_key_exists("sign", $this->httpRequest)) {
+            if (array_key_exists("name", $this->postBody)
+                && array_key_exists("code", $this->postBody)
+                && array_key_exists("sign", $this->postBody)) {
 
-                $fullName = $this->httpRequest["name"];
-                $code = $this->httpRequest["code"];
-                $sign = $this->httpRequest["sign"];
+                $fullName = $this->postBody["name"];
+                $code = $this->postBody["code"];
+                $sign = $this->postBody["sign"];
+                if (strlen($code) != 3) {
+                    $httpResponse = new HttpResponse(400, null, "Wrong body");
+                    $httpResponse->sendJSON();
+                    exit();
+                }
             } else {
                 $httpResponse = new HttpResponse(400, null, "Wrong body");
                 $httpResponse->sendJSON();
@@ -57,13 +71,17 @@ class Router
         //POST /exchangeRates
         if ($this->httpMethod === "POST" && $this->q === "exchangeRates") {
             // Checking for wrong Body
-            if (array_key_exists("baseCurrencyCode", $this->httpRequest)
-                && array_key_exists("targetCurrencyCode", $this->httpRequest)
-                && array_key_exists("rate", $this->httpRequest)) {
-
-                $baseCurrencyCode = $this->httpRequest["baseCurrencyCode"];
-                $targetCurrencyCode = $this->httpRequest["targetCurrencyCode"];
-                $rate = $this->httpRequest["rate"];
+            if (array_key_exists("baseCurrencyCode", $this->postBody)
+                && array_key_exists("targetCurrencyCode", $this->postBody)
+                && array_key_exists("rate", $this->postBody)) {
+                $baseCurrencyCode = $this->postBody["baseCurrencyCode"];
+                $targetCurrencyCode = $this->postBody["targetCurrencyCode"];
+                $rate = $this->postBody["rate"];
+                if (!is_numeric($rate)) {
+                    $httpResponse = new HttpResponse(400, null, "Wrong body");
+                    $httpResponse->sendJSON();
+                    exit();
+                }
             } else {
                 $httpResponse = new HttpResponse(400, null, "Wrong body");
                 $httpResponse->sendJSON();
@@ -78,8 +96,12 @@ class Router
 
         // With     sign / in URL
         $qArray = explode("/", $this->q);
-
-        // GET /currency/EUR
+        if (count($qArray) == 1) {
+            $httpResponse = new HttpResponse(404, null, "Wrong URL");
+            $httpResponse->sendJSON();
+            exit();
+        }
+        // GET /currency/USD
         if ($this->httpMethod === "GET" && ($qArray[0] === "currency")) {
             // Checking for wrong URL
             $code = $qArray[1];
@@ -94,7 +116,7 @@ class Router
         }
 
         // GET /exchangeRate/USDRUB
-        if ($this->httpMethod === "GET" && ($qArray[0] === "exchangeRates")) {
+        if ($this->httpMethod === "GET" && ($qArray[0] === "exchangeRate")) {
             // Checking for wrong URL
             $codes = $qArray[1];
             if (strlen($codes) != 6) {
@@ -120,25 +142,30 @@ class Router
                 exit();
             }
             // Checking for wrong Body
-            var_dump($this->httpRequest["rate"]); //TODO Постман вместе с Патчем не отправляет Боди((
-            exit();
-            /*if (array_key_exists("rate", $this->httpRequest)) {
-                $rate = $this->httpRequest["rate"];
+            $patchBody = file_get_contents('php://input');
+            if (str_contains($patchBody, "rate=")) {
+                $patchBody = explode("=", $patchBody);
+                if (is_numeric($patchBody[1])) {
+                    $newRate = (float)$patchBody[1];
+                } else {
+                    $httpResponse = new HttpResponse(400, null, "Wrong body");
+                    $httpResponse->sendJSON();
+                    exit();
+                }
             } else {
                 $httpResponse = new HttpResponse(400, null, "Wrong body");
                 $httpResponse->sendJSON();
                 exit();
             }
-
             $baseCurrencyCode = substr($codes, 0, 3);
             $targetCurrencyCode = substr($codes, 3, 3);
 
-            $httpResponse = Action::patchExchangeRateByCodes($baseCurrencyCode, $targetCurrencyCode, $rate);
+            $httpResponse = Action::patchExchangeRateByCodes($baseCurrencyCode, $targetCurrencyCode, $newRate);
             $httpResponse->sendJSON();
-            exit();*/
+            exit();
         }
 
-        $httpResponse = new HttpResponse(404, null, "Wrong URL");
+        $httpResponse = new HttpResponse(404, null, "Wrong URL or method");
         $httpResponse->sendJSON();
     }
 }
