@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DTO;
+namespace App\Database;
 
 use App\Objects\Currency;
 use App\Objects\ExchangeRate;

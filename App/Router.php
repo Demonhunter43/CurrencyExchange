@@ -3,7 +3,6 @@
 namespace App;
 
 
-use App\DTO\Action;
 use App\Http\HttpResponse;
 
 define("POST_CUR", "POST/currencies");
@@ -176,34 +175,34 @@ class Router
 
         // GET /currencies
         if ($this->httpMethod === "GET" && $this->q === "currencies") {
-            $httpResponse = Action::showAllCurrencies();
+            $httpResponse = Controller::showAllCurrencies();
             $httpResponse->sendJSON();
             exit();
         }
         // POST /currencies
         if ($this->httpMethod === "POST" && $this->q === "currencies") {
             $input = $this->checkAndGetInput(POST_CUR);
-            $httpResponse = Action::addCurrency($input["fullName"], $input["code"], $input["sign"]);
+            $httpResponse = Controller::addCurrency($input["fullName"], $input["code"], $input["sign"]);
             $httpResponse->sendJSON();
             exit();
         }
         //GET /exchangeRates
         if ($this->httpMethod === "GET" && $this->q === "exchangeRates") {
-            $httpResponse = Action::showAllExchangeRates();
+            $httpResponse = Controller::showAllExchangeRates();
             $httpResponse->sendJSON();
             exit();
         }
         //POST /exchangeRates
         if ($this->httpMethod === "POST" && $this->q === "exchangeRates") {
             $input = $this->checkAndGetInput(POST_RATE);
-            $httpResponse = Action::addExchangeRate($input["baseCurrencyCode"], $input["targetCurrencyCode"], $input["rate"]);
+            $httpResponse = Controller::addExchangeRate($input["baseCurrencyCode"], $input["targetCurrencyCode"], $input["rate"]);
             $httpResponse->sendJSON();
             exit();
         }
         // GET /exchange?from=BASE_CURRENCY_CODE&to=TARGET_CURRENCY_CODE&amount=$AMOUNT #
         if ($this->httpMethod === "GET" && $this->q == "exchange") {
             $input = $this->checkAndGetInput(GET_EXCHANGE);
-            $httpResponse = Action::getExchange($input["baseCurrencyCode"], $input["targetCurrencyCode"], $input["amount"]);
+            $httpResponse = Controller::getExchange($input["baseCurrencyCode"], $input["targetCurrencyCode"], $input["amount"]);
             $httpResponse->sendJSON();
             exit();
         }
@@ -220,7 +219,7 @@ class Router
         // GET /currency/USD
         if ($this->httpMethod === "GET" && ($qWord === "currency")) {
             $input = $this->checkAndGetInput(GET_CUR);
-            $httpResponse = Action::showCurrencyByCode($input["code"]);
+            $httpResponse = Controller::showCurrencyByCode($input["code"]);
             $httpResponse->sendJSON();
             exit();
         }
@@ -228,14 +227,14 @@ class Router
         // GET /exchangeRate/USDRUB
         if ($this->httpMethod === "GET" && ($qWord === "exchangeRate")) {
             $input = $this->checkAndGetInput(GET_RATE);
-            $httpResponse = Action::showExchangeRateByCodes($input["baseCurrencyCode"], $input["targetCurrencyCode"]);
+            $httpResponse = Controller::showExchangeRateByCodes($input["baseCurrencyCode"], $input["targetCurrencyCode"]);
             $httpResponse->sendJSON();
             exit();
         }
         // PATCH /exchangeRate/USDRUB
         if ($this->httpMethod === "PATCH" && ($qWord === "exchangeRate")) {
             $input = $this->checkAndGetInput(PATCH_RATE);
-            $httpResponse = Action::patchExchangeRateByCodes($input["baseCurrencyCode"], $input["targetCurrencyCode"], $input["newRate"]);
+            $httpResponse = Controller::patchExchangeRateByCodes($input["baseCurrencyCode"], $input["targetCurrencyCode"], $input["newRate"]);
             $httpResponse->sendJSON();
             exit();
         }

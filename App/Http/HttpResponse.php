@@ -42,4 +42,9 @@ class HttpResponse
             echo json_encode($this->data);
         }
     }
+
+    public function getData(): ?array
+    {
+        return $this->data;
+    }
 }

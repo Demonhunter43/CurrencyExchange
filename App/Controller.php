@@ -1,13 +1,15 @@
 <?php
 
-namespace App\DTO;
+namespace App;
 // This abstract class calls all need methods and check Database response and return HTTP response to router
 use App\Database\DatabaseAction;
+use App\Database\DataToObjectTransformer;
 use App\Http\HttpResponse;
 use App\Objects\Currency;
+use App\Objects\Exchange;
 use App\Objects\ExchangeRate;
 
-class Action
+class Controller
 {
     public static function showAllCurrencies(): HttpResponse
     {
@@ -49,7 +51,7 @@ class Action
         $newCurrency = new Currency(null, $code, $fullName, $sign);
 
         if ($databaseAction->addCurrency($newCurrency)) {
-            $httpResponse = Action::showCurrencyByCode($code, $databaseAction);
+            $httpResponse = Controller::showCurrencyByCode($code, $databaseAction);
         }
         $httpResponse->setCode(201);
         return $httpResponse;
@@ -74,7 +76,11 @@ class Action
         if ($databaseResponse->isNotSuccess()) {
             return new HttpResponse($databaseResponse->getCode(), null, $databaseResponse->getErrorMessage());
         }
-        $dataExchangeRate = $databaseAction->getExchangeRateByCurrenciesCodes($baseCurrencyCode, $targetCurrencyCode);
+        $databaseResponse = $databaseAction->getExchangeRateByCurrenciesCodes($baseCurrencyCode, $targetCurrencyCode);
+        if ($databaseResponse->isNotSuccess()) {
+            return new HttpResponse($databaseResponse->getCode(), null, $databaseResponse->getErrorMessage());
+        }
+        $dataExchangeRate = $databaseResponse->getData();
         $exchangeRate = DataToObjectTransformer::makeExchangeRateFromData($dataExchangeRate);
         return new HttpResponse(200, ["0" => $exchangeRate]);
     }
@@ -96,7 +102,11 @@ class Action
         $newExchangeRate = new ExchangeRate(null, $baseCurrency, $targetCurrency, $rate);
 
         if ($databaseAction->addExchangeRate($newExchangeRate)) {
-            $dataExchangeRate = $databaseAction->getExchangeRateByCurrenciesCodes($baseCurrencyCode, $targetCurrencyCode);
+            $databaseResponse = $databaseAction->getExchangeRateByCurrenciesCodes($baseCurrencyCode, $targetCurrencyCode);
+            if ($databaseResponse->isNotSuccess()) {
+                return new HttpResponse($databaseResponse->getCode(), null, $databaseResponse->getErrorMessage());
+            }
+            $dataExchangeRate = $databaseResponse->getData();
             $exchangeRate = DataToObjectTransformer::makeExchangeRateFromData($dataExchangeRate);
         }
         return new HttpResponse(201, ["0" => $exchangeRate]);
@@ -109,7 +119,11 @@ class Action
         if ($databaseResponse->isNotSuccess()) {
             return new HttpResponse($databaseResponse->getCode(), null, $databaseResponse->getErrorMessage());
         }
-        $dataExchangeRate = $databaseAction->getExchangeRateByCurrenciesCodes($baseCurrencyCode, $targetCurrencyCode);
+        $databaseResponse = $databaseAction->getExchangeRateByCurrenciesCodes($baseCurrencyCode, $targetCurrencyCode);
+        if ($databaseResponse->isNotSuccess()) {
+            return new HttpResponse($databaseResponse->getCode(), null, $databaseResponse->getErrorMessage());
+        }
+        $dataExchangeRate = $databaseResponse->getData();
         $exchangeRate = DataToObjectTransformer::makeExchangeRateFromData($dataExchangeRate);
         $exchangeRate->setRate($rate);
         $databaseResponse = $databaseAction->patchExchangeRate($exchangeRate);
@@ -121,16 +135,48 @@ class Action
 
     public static function getExchange(string $baseCurrencyCode, string $targetCurrencyCode, float $amount): HttpResponse
     {
+        $exchange = null;
         $databaseAction = new DatabaseAction();
         $databaseResponse = $databaseAction->connect();
         if ($databaseResponse->isNotSuccess()) {
             return new HttpResponse($databaseResponse->getCode(), null, $databaseResponse->getErrorMessage());
         }
-        $databaseResponse = ..
-        if ($databaseResponse->isSuccess()){
 
+        $databaseResponse = $databaseAction->getExchangeRateByCurrenciesCodes($baseCurrencyCode, $targetCurrencyCode);
+        if ($databaseResponse->isSuccess()) {
+            $dataExchangeRate = $databaseResponse->getData();
+            $exchangeRate = DataToObjectTransformer::makeExchangeRateFromData($dataExchangeRate);
+            $exchange = new Exchange($exchangeRate->getBaseCurrency(), $exchangeRate->getTargetCurrency(), $exchangeRate->getRate(), $amount);
+        } else {
+
+            $databaseResponse = $databaseAction->getExchangeRateByCurrenciesCodes($targetCurrencyCode, $baseCurrencyCode);
+            if ($databaseResponse->isSuccess()) {
+                $dataExchangeRate = $databaseResponse->getData();
+                $exchangeRate = DataToObjectTransformer::makeExchangeRateFromData($dataExchangeRate);
+                $exchange = new Exchange($exchangeRate->getTargetCurrency(), $exchangeRate->getBaseCurrency(), 1 / ($exchangeRate->getRate()), $amount);
+            } else {
+
+                $databaseResponse = $databaseAction->getExchangeRateByCurrenciesCodes($baseCurrencyCode, "USD");
+                if ($databaseResponse->isSuccess()) {
+                    $dataExchangeRate = $databaseResponse->getData();
+                    $exchangeRate = DataToObjectTransformer::makeExchangeRateFromData($dataExchangeRate);
+                    $baseCurrency = $exchangeRate->getBaseCurrency();
+                    $baseUSD_rate = $exchangeRate->getRate();
+                    $databaseResponse = $databaseAction->getExchangeRateByCurrenciesCodes("USD", $targetCurrencyCode);
+                    if ($databaseResponse->isSuccess()) {
+                        $dataExchangeRate = $databaseResponse->getData();
+                        $exchangeRate = DataToObjectTransformer::makeExchangeRateFromData($dataExchangeRate);
+                        $targetCurrency = $exchangeRate->getTargetCurrency();
+                        $USD_targetRate = $exchangeRate->getRate();
+                        $exchange = new Exchange($baseCurrency, $targetCurrency, $baseUSD_rate * $USD_targetRate, $amount);
+                    }
+                }
+            }
         }
-        $dataExchangeRate = $databaseAction->getExchangeRateByCurrenciesCodes($baseCurrencyCode, $targetCurrencyCode);
-        $exchangeRate = DataToObjectTransformer::makeExchangeRateFromData($dataExchangeRate);
+        if (is_null($exchange)) {
+            return new HttpResponse(404, null, "No exchange rates for this codes");
+        }
+        $exchange->convert();
+        return new HttpResponse(200, ["0" => $exchange], null);
     }
 }

@@ -100,7 +100,7 @@ class DatabaseAction
         return $stmt->fetchAll(\PDO::FETCH_ASSOC)[0];
     }
 
-    public function getExchangeRateByCurrenciesCodes(string $baseCurrencyCode, string $targetCurrencyCode): array
+    public function getExchangeRateByCurrenciesCodes(string $baseCurrencyCode, string $targetCurrencyCode): DatabaseResponse
     {
         $sql = "SELECT  exchangerates.ID,
                         BaseCurrency.ID AS BaseCurrencyID,
@@ -119,11 +119,20 @@ class DatabaseAction
                 ON TargetCurrency.ID = exchangerates.TargetCurrencyID
                 WHERE BaseCurrency.Code = :baseCurrencyCode AND TargetCurrency.Code = :targetCurrencyCode";
         $stmt = $this->connection->getPdo()->prepare($sql);
-        $stmt->execute([
-            'baseCurrencyCode' => $baseCurrencyCode,
-            'targetCurrencyCode' => $targetCurrencyCode
-        ]);
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC)[0];
+        try {
+            $stmt->execute([
+                'baseCurrencyCode' => $baseCurrencyCode,
+                'targetCurrencyCode' => $targetCurrencyCode
+            ]);
+        } catch (\PDOException $e){
+            return new DatabaseResponse(404, null, $e->getMessage());
+        }
+        $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        if (count($data) === 0){
+            return new DatabaseResponse(404, null, "This pair is not presented");
+        }
+        $data = $data[0];
+        return new DatabaseResponse(200, $data, null);
     }
 
     public function addExchangeRate(ExchangeRate $exchangeRate): bool

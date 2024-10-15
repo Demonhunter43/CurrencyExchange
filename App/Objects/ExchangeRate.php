@@ -78,4 +78,14 @@ class ExchangeRate  implements \JsonSerializable
             'rate' => $this->rate
         ];
     }
+
+    public function getBaseCurrency(): Currency
+    {
+        return $this->baseCurrency;
+    }
+
+    public function getTargetCurrency(): Currency
+    {
+        return $this->targetCurrency;
+    }
 }
