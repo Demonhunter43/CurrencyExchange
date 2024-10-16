@@ -34,7 +34,7 @@ class DataToObjectTransformer
 
     static function makeExchangeRateFromData(array $dataExchangeRate): ExchangeRate
     {
-        $baseCurrency = new Currency($dataExchangeRate["BaseCurrencyID"],$dataExchangeRate["BaseCurrencyCode"],$dataExchangeRate["BaseCurrencyFullName"],$dataExchangeRate["BaseCurrencySign"]); //TODO Currencies constructor, Exchange constructor и переделать везде, где есть этотметод
+        $baseCurrency = new Currency($dataExchangeRate["BaseCurrencyID"],$dataExchangeRate["BaseCurrencyCode"],$dataExchangeRate["BaseCurrencyFullName"],$dataExchangeRate["BaseCurrencySign"]);
         $targetCurrency = new Currency($dataExchangeRate["TargetCurrencyID"],$dataExchangeRate["TargetCurrencyCode"],$dataExchangeRate["TargetCurrencyFullName"],$dataExchangeRate["TargetCurrencySign"]);
         return new ExchangeRate($dataExchangeRate["ID"],$baseCurrency, $targetCurrency, $dataExchangeRate["Rate"]);
     }

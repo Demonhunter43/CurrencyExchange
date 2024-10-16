@@ -88,13 +88,13 @@ class Router
                     $to = $query_parts["to"];
                     $amount = $query_parts["amount"];
                 } else {
-                    $httpResponse = new HttpResponse(404, null, "Wrong URL");
+                    $httpResponse = new HttpResponse(404, null, "Wrong URL or method");
                     $httpResponse->sendJSON();
                     exit();
                 }
                 // Check parameters
                 if (is_numeric($from) || is_numeric($to) || !is_numeric($amount)) {
-                    $httpResponse = new HttpResponse(404, null, "Wrong URL");
+                    $httpResponse = new HttpResponse(404, null, "Wrong URL or method");
                     $httpResponse->sendJSON();
                     exit();
                 }
@@ -107,7 +107,7 @@ class Router
             case GET_CUR:
                 $code = explode("/", $this->q)[1];
                 if (strlen($code) != 3) {
-                    $httpResponse = new HttpResponse(404, null, "Wrong URL");
+                    $httpResponse = new HttpResponse(404, null, "Wrong URL or method");
                     $httpResponse->sendJSON();
                     exit();
                 }
@@ -116,10 +116,10 @@ class Router
                 ];
                 break;
             case GET_RATE:
-                // Checking for wrong URL
+                // Checking for Wrong URL or method
                 $codes = explode("/", $this->q)[1];
                 if (strlen($codes) != 6) {
-                    $httpResponse = new HttpResponse(404, null, "Wrong URL");
+                    $httpResponse = new HttpResponse(404, null, "Wrong URL or method");
                     $httpResponse->sendJSON();
                     exit();
                 }
@@ -131,10 +131,10 @@ class Router
                 ];
                 break;
             case PATCH_RATE:
-                // Checking for wrong URL
+                // Checking for Wrong URL or method
                 $codes = explode("/", $this->q)[1];
                 if (strlen($codes) != 6) {
-                    $httpResponse = new HttpResponse(404, null, "Wrong URL");
+                    $httpResponse = new HttpResponse(404, null, "Wrong URL or method");
                     $httpResponse->sendJSON();
                     exit();
                 }
@@ -168,7 +168,7 @@ class Router
     public function run(): void
     {
         if (is_null($this->q)) {
-            $httpResponse = new HttpResponse(404, null, "Wrong URL");
+            $httpResponse = new HttpResponse(404, null, "Wrong URL or method");
             $httpResponse->sendJSON();
             exit();
         }
@@ -210,7 +210,7 @@ class Router
         // With     sign / in URL
         $qArray = explode("/", $this->q);
         if (count($qArray) == 1) {
-            $httpResponse = new HttpResponse(404, null, "Wrong URL");
+            $httpResponse = new HttpResponse(404, null, "Wrong URL or method");
             $httpResponse->sendJSON();
             exit();
         }

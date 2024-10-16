@@ -3,180 +3,168 @@
 namespace App;
 // This abstract class calls all need methods and check Database response and return HTTP response to router
 use App\Database\DatabaseAction;
-use App\Database\DataToObjectTransformer;
 use App\Http\HttpResponse;
 use App\Objects\Currency;
 use App\Objects\Exchange;
 use App\Objects\ExchangeRate;
+use Exception;
 
 class Controller
 {
+
     public static function showAllCurrencies(): HttpResponse
     {
-        $databaseAction = new DatabaseAction();
-        $databaseResponse = $databaseAction->connect();
-        if ($databaseResponse->isNotSuccess()) {
-            return new HttpResponse($databaseResponse->getCode(), null, $databaseResponse->getErrorMessage());
+        try {
+            $databaseAction = new DatabaseAction();
+            $data = $databaseAction->getAllCurrencies();
+        } catch (Exception $e) {
+            return new HttpResponse(500, null, $e->getMessage());
         }
-        $data = $databaseAction->getAllCurrencies();
-        $arrayCurrencies = DataToObjectTransformer::makeCurrenciesArrayFromData($data);
-        return new HttpResponse(200, $arrayCurrencies);
+        return new HttpResponse(200, $data);
     }
 
     public static function showCurrencyByCode(string $code, DatabaseAction $databaseAction = null): HttpResponse
     {
-        if (!is_null($databaseAction)) {
-            $data = $databaseAction->getCurrencyByCode($code);
-            $currency = DataToObjectTransformer::makeCurrencyFromData($data);
-            return new HttpResponse(200, ["0" => $currency]);
+        if (is_null($databaseAction)) {
+            try {
+                $databaseAction = new DatabaseAction();
+            } catch (Exception $e) {
+                return new HttpResponse(500, null, $e->getMessage());
+            }
         }
 
-        $databaseAction = new DatabaseAction();
-        $databaseResponse = $databaseAction->connect();
-        if ($databaseResponse->isNotSuccess()) {
-            return new HttpResponse($databaseResponse->getCode(), null, $databaseResponse->getErrorMessage());
+        try {
+            $currency = $databaseAction->getCurrencyByCode($code);
+        } catch (Exception $e) {
+            return new HttpResponse(500, null, $e->getMessage());
         }
-        $data = $databaseAction->getCurrencyByCode($code);
-        $currency = DataToObjectTransformer::makeCurrencyFromData($data);
-        return new HttpResponse(200, ["0" => $currency]);
+        return new HttpResponse(200, ["0" => ["0" => $currency]]);
     }
 
     public static function addCurrency(string $fullName, string $code, string $sign): HttpResponse
     {
-        $databaseAction = new DatabaseAction();
-        $databaseResponse = $databaseAction->connect();
-        if ($databaseResponse->isNotSuccess()) {
-            return new HttpResponse($databaseResponse->getCode(), null, $databaseResponse->getErrorMessage());
+        try {
+            $databaseAction = new DatabaseAction();
+        } catch (Exception $e) {
+            return new HttpResponse(500, null, $e->getMessage());
         }
-        $newCurrency = new Currency(null, $code, $fullName, $sign);
 
-        if ($databaseAction->addCurrency($newCurrency)) {
-            $httpResponse = Controller::showCurrencyByCode($code, $databaseAction);
+        try {
+            $newCurrency = new Currency(null, $code, $fullName, $sign);
+            $databaseAction->addCurrency($newCurrency);
+        } catch (Exception $e) {
+            return new HttpResponse(409, null, $e->getMessage());
         }
+        $httpResponse = Controller::showCurrencyByCode($code, $databaseAction);
         $httpResponse->setCode(201);
         return $httpResponse;
     }
 
     public static function showAllExchangeRates(): HttpResponse
     {
-        $databaseAction = new DatabaseAction();
-        $databaseResponse = $databaseAction->connect();
-        if ($databaseResponse->isNotSuccess()) {
-            return new HttpResponse($databaseResponse->getCode(), null, $databaseResponse->getErrorMessage());
+        try {
+            $databaseAction = new DatabaseAction();
+            $arrayExchangeRates = $databaseAction->getAllExchangeRates();
+        } catch (Exception $e) {
+            return new HttpResponse(500, null, $e->getMessage());
         }
-        $data = $databaseAction->getAllExchangeRates();
-        $arrayExchangeRates = DataToObjectTransformer::makeExchangeRatesArrayFromData($data);
         return new HttpResponse(200, $arrayExchangeRates);
     }
 
     public static function showExchangeRateByCodes(string $baseCurrencyCode, string $targetCurrencyCode): HttpResponse
     {
-        $databaseAction = new DatabaseAction();
-        $databaseResponse = $databaseAction->connect();
-        if ($databaseResponse->isNotSuccess()) {
-            return new HttpResponse($databaseResponse->getCode(), null, $databaseResponse->getErrorMessage());
+        try {
+            $databaseAction = new DatabaseAction();
+        } catch (Exception $e) {
+            return new HttpResponse(500, null, $e->getMessage());
         }
-        $databaseResponse = $databaseAction->getExchangeRateByCurrenciesCodes($baseCurrencyCode, $targetCurrencyCode);
-        if ($databaseResponse->isNotSuccess()) {
-            return new HttpResponse($databaseResponse->getCode(), null, $databaseResponse->getErrorMessage());
+        try {
+            $exchangeRate = $databaseAction->getExchangeRateByCurrenciesCodes($baseCurrencyCode, $targetCurrencyCode);
+        } catch (Exception $e) {
+            return new HttpResponse(404, null, $e->getMessage());
         }
-        $dataExchangeRate = $databaseResponse->getData();
-        $exchangeRate = DataToObjectTransformer::makeExchangeRateFromData($dataExchangeRate);
         return new HttpResponse(200, ["0" => $exchangeRate]);
     }
 
     public static function addExchangeRate(string $baseCurrencyCode, string $targetCurrencyCode, float $rate): HttpResponse
     {
-        $databaseAction = new DatabaseAction();
-        $databaseResponse = $databaseAction->connect();
-        if ($databaseResponse->isNotSuccess()) {
-            return new HttpResponse($databaseResponse->getCode(), null, $databaseResponse->getErrorMessage());
+        try {
+            $databaseAction = new DatabaseAction();
+        } catch (Exception $e) {
+            return new HttpResponse(500, null, $e->getMessage());
         }
-
-        $data = $databaseAction->getCurrencyByCode($baseCurrencyCode);
-        $baseCurrency = DataToObjectTransformer::makeCurrencyFromData($data);
-
-        $data = $databaseAction->getCurrencyByCode($targetCurrencyCode);
-        $targetCurrency = DataToObjectTransformer::makeCurrencyFromData($data);
-
+        try {
+            $baseCurrency = $databaseAction->getCurrencyByCode($baseCurrencyCode);
+            $targetCurrency = $databaseAction->getCurrencyByCode($targetCurrencyCode);
+        } catch (Exception $e) {
+            return new HttpResponse(500, null, $e->getMessage());
+        }
         $newExchangeRate = new ExchangeRate(null, $baseCurrency, $targetCurrency, $rate);
-
-        if ($databaseAction->addExchangeRate($newExchangeRate)) {
-            $databaseResponse = $databaseAction->getExchangeRateByCurrenciesCodes($baseCurrencyCode, $targetCurrencyCode);
-            if ($databaseResponse->isNotSuccess()) {
-                return new HttpResponse($databaseResponse->getCode(), null, $databaseResponse->getErrorMessage());
-            }
-            $dataExchangeRate = $databaseResponse->getData();
-            $exchangeRate = DataToObjectTransformer::makeExchangeRateFromData($dataExchangeRate);
+        try {
+            $databaseAction->addExchangeRate($newExchangeRate);
+        } catch (Exception $e) {
+            return new HttpResponse(409, null, $e->getMessage());
+        }
+        try {
+            $exchangeRate = $databaseAction->getExchangeRateByCurrenciesCodes($baseCurrencyCode, $targetCurrencyCode);
+        } catch (Exception $e) {
+            return new HttpResponse(500, null, $e->getMessage());
         }
         return new HttpResponse(201, ["0" => $exchangeRate]);
     }
 
     public static function patchExchangeRateByCodes(string $baseCurrencyCode, string $targetCurrencyCode, float $rate): HttpResponse
     {
-        $databaseAction = new DatabaseAction();
-        $databaseResponse = $databaseAction->connect();
-        if ($databaseResponse->isNotSuccess()) {
-            return new HttpResponse($databaseResponse->getCode(), null, $databaseResponse->getErrorMessage());
+        try {
+            $databaseAction = new DatabaseAction();
+        } catch (Exception $e) {
+            return new HttpResponse(500, null, $e->getMessage());
         }
-        $databaseResponse = $databaseAction->getExchangeRateByCurrenciesCodes($baseCurrencyCode, $targetCurrencyCode);
-        if ($databaseResponse->isNotSuccess()) {
-            return new HttpResponse($databaseResponse->getCode(), null, $databaseResponse->getErrorMessage());
-        }
-        $dataExchangeRate = $databaseResponse->getData();
-        $exchangeRate = DataToObjectTransformer::makeExchangeRateFromData($dataExchangeRate);
-        $exchangeRate->setRate($rate);
-        $databaseResponse = $databaseAction->patchExchangeRate($exchangeRate);
-        if ($databaseResponse->isNotSuccess()) {
-            return new HttpResponse(500, null, "Something went wrong when UPDATE");
+        try {
+            $exchangeRate = $databaseAction->getExchangeRateByCurrenciesCodes($baseCurrencyCode, $targetCurrencyCode);
+            $exchangeRate->setRate($rate);
+            $databaseAction->patchExchangeRate($exchangeRate);
+        } catch (Exception $e) {
+            return new HttpResponse(404, null, $e->getMessage());
         }
         return new HttpResponse(200, ["0" => $exchangeRate]);
     }
 
     public static function getExchange(string $baseCurrencyCode, string $targetCurrencyCode, float $amount): HttpResponse
     {
-        $exchange = null;
-        $databaseAction = new DatabaseAction();
-        $databaseResponse = $databaseAction->connect();
-        if ($databaseResponse->isNotSuccess()) {
-            return new HttpResponse($databaseResponse->getCode(), null, $databaseResponse->getErrorMessage());
+        try {
+            $databaseAction = new DatabaseAction();
+        } catch (Exception $e) {
+            return new HttpResponse(500, null, $e->getMessage());
         }
-
-        $databaseResponse = $databaseAction->getExchangeRateByCurrenciesCodes($baseCurrencyCode, $targetCurrencyCode);
-        if ($databaseResponse->isSuccess()) {
-            $dataExchangeRate = $databaseResponse->getData();
-            $exchangeRate = DataToObjectTransformer::makeExchangeRateFromData($dataExchangeRate);
+        try {
+            $exchangeRate = $databaseAction->getExchangeRateByCurrenciesCodes($baseCurrencyCode, $targetCurrencyCode);
             $exchange = new Exchange($exchangeRate->getBaseCurrency(), $exchangeRate->getTargetCurrency(), $exchangeRate->getRate(), $amount);
-        } else {
-
-            $databaseResponse = $databaseAction->getExchangeRateByCurrenciesCodes($targetCurrencyCode, $baseCurrencyCode);
-            if ($databaseResponse->isSuccess()) {
-                $dataExchangeRate = $databaseResponse->getData();
-                $exchangeRate = DataToObjectTransformer::makeExchangeRateFromData($dataExchangeRate);
-                $exchange = new Exchange($exchangeRate->getTargetCurrency(), $exchangeRate->getBaseCurrency(), 1 / ($exchangeRate->getRate()), $amount);
-            } else {
-
-                $databaseResponse = $databaseAction->getExchangeRateByCurrenciesCodes($baseCurrencyCode, "USD");
-                if ($databaseResponse->isSuccess()) {
-                    $dataExchangeRate = $databaseResponse->getData();
-                    $exchangeRate = DataToObjectTransformer::makeExchangeRateFromData($dataExchangeRate);
-                    $baseCurrency = $exchangeRate->getBaseCurrency();
-                    $baseUSD_rate = $exchangeRate->getRate();
-                    $databaseResponse = $databaseAction->getExchangeRateByCurrenciesCodes("USD", $targetCurrencyCode);
-                    if ($databaseResponse->isSuccess()) {
-                        $dataExchangeRate = $databaseResponse->getData();
-                        $exchangeRate = DataToObjectTransformer::makeExchangeRateFromData($dataExchangeRate);
-                        $targetCurrency = $exchangeRate->getTargetCurrency();
-                        $USD_targetRate = $exchangeRate->getRate();
-                        $exchange = new Exchange($baseCurrency, $targetCurrency, $baseUSD_rate * $USD_targetRate, $amount);
-                    }
-                }
-            }
+            $exchange->convert();
+            return new HttpResponse(200, ["0" => $exchange], null);
+        } catch (Exception $e) {
         }
-        if (is_null($exchange)) {
-            return new HttpResponse(404, null, "No exchange rates for this codes");
+
+        try {
+            $exchangeRate = $databaseAction->getExchangeRateByCurrenciesCodes($targetCurrencyCode, $baseCurrencyCode);
+            $exchange = new Exchange($exchangeRate->getBaseCurrency(), $exchangeRate->getTargetCurrency(), 1 / ($exchangeRate->getRate()), $amount);
+            $exchange->convert();
+            return new HttpResponse(200, ["0" => $exchange], null);
+        } catch (Exception $e) {
         }
-        $exchange->convert();
-        return new HttpResponse(200, ["0" => $exchange], null);
+        try {
+            $exchangeRate = $databaseAction->getExchangeRateByCurrenciesCodes($baseCurrencyCode, "USD");
+            $baseCurrency = $exchangeRate->getBaseCurrency();
+            $baseUSD_rate = $exchangeRate->getRate();
+
+            $exchangeRate = $databaseAction->getExchangeRateByCurrenciesCodes("USD", $targetCurrencyCode);
+            $targetCurrency = $exchangeRate->getBaseCurrency();
+            $USD_targetRate = $exchangeRate->getRate();
+            $exchange = new Exchange($baseCurrency, $targetCurrency, $baseUSD_rate * $USD_targetRate, $amount);
+            $exchange->convert();
+            return new HttpResponse(200, ["0" => $exchange], null);
+        } catch (Exception $e) {
+        }
+        return new HttpResponse(404, null, "No exchange rates for this codes");
     }
 }

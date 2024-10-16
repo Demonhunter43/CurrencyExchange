@@ -11,27 +11,17 @@ class DatabaseAction
 
     public function __construct()
     {
+        $this->connection = new Connection();
     }
-
-    public function connect(): DatabaseResponse
-    {
-        try {
-            $this->connection = new Connection();
-        } catch (\PDOException $exception) {
-            return new DatabaseResponse(500, null, "Can't connect to DB");
-        }
-        return new DatabaseResponse(200);
-    }
-
 
     public function getAllCurrencies(): array
     {
         $sql = "SELECT * FROM `currencies`";
         $stmt = $this->connection->getPdo()->query($sql);
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        return DataToObjectTransformer::makeCurrenciesArrayFromData($stmt->fetchAll(\PDO::FETCH_ASSOC));
     }
 
-    public function getCurrencyByCode($code): array
+    public function getCurrencyByCode($code): Currency
     {
         $sql = "SELECT * FROM `currencies`
                 WHERE `Code` = :code";
@@ -39,17 +29,14 @@ class DatabaseAction
         $stmt->execute([
             'code' => $code
         ]);
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC)[0];
+        $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        if (count($data) == 0) {
+            throw new \Exception("Wrong code");
+        }
+        return DataToObjectTransformer::makeCurrencyFromData($data);
     }
 
-    public function getCurrencyByID($id): array
-    {
-        $sql = "SELECT * FROM `currencies` WHERE `ID` = $id";
-        $stmt = $this->connection->getPdo()->query($sql);
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC)[0];
-    }
-
-    public function addCurrency(Currency $currency): bool
+    public function addCurrency(Currency $currency): void
     {
         $code = $currency->getCode();
         $fullName = $currency->getFullName();
@@ -63,7 +50,6 @@ class DatabaseAction
             'fullName' => $fullName,
             'sign' => $sign
         ]);
-        return true;
     }
 
     public function getAllExchangeRates(): array
@@ -84,23 +70,11 @@ class DatabaseAction
                 JOIN `currencies` AS TargetCurrency
                 ON TargetCurrency.ID = exchangerates.TargetCurrencyID;";
         $stmt = $this->connection->getPdo()->query($sql);
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        return DataToObjectTransformer::makeExchangeRatesArrayFromData($data);
     }
 
-    public function getExchangeRateByCurrenciesID(int $baseCurrencyID, int $targetCurrencyID): array
-    {
-        $sql = "SELECT * FROM `exchangerates` 
-                WHERE BaseCurrencyId = :baseCurrencyID AND TargetCurrencyId = :targetCurrencyID";
-
-        $stmt = $this->connection->getPdo()->prepare($sql);
-        $stmt->execute([
-            'baseCurrencyID' => $baseCurrencyID,
-            'targetCurrencyID' => $targetCurrencyID
-        ]);
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC)[0];
-    }
-
-    public function getExchangeRateByCurrenciesCodes(string $baseCurrencyCode, string $targetCurrencyCode): DatabaseResponse
+    public function getExchangeRateByCurrenciesCodes(string $baseCurrencyCode, string $targetCurrencyCode): ExchangeRate
     {
         $sql = "SELECT  exchangerates.ID,
                         BaseCurrency.ID AS BaseCurrencyID,
@@ -119,23 +93,19 @@ class DatabaseAction
                 ON TargetCurrency.ID = exchangerates.TargetCurrencyID
                 WHERE BaseCurrency.Code = :baseCurrencyCode AND TargetCurrency.Code = :targetCurrencyCode";
         $stmt = $this->connection->getPdo()->prepare($sql);
-        try {
-            $stmt->execute([
-                'baseCurrencyCode' => $baseCurrencyCode,
-                'targetCurrencyCode' => $targetCurrencyCode
-            ]);
-        } catch (\PDOException $e){
-            return new DatabaseResponse(404, null, $e->getMessage());
-        }
+        $stmt->execute([
+            'baseCurrencyCode' => $baseCurrencyCode,
+            'targetCurrencyCode' => $targetCurrencyCode
+        ]);
         $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        if (count($data) === 0){
-            return new DatabaseResponse(404, null, "This pair is not presented");
+        if (count($data) === 0) {
+            throw new \Exception("No pair {$baseCurrencyCode}{$targetCurrencyCode} in database");
         }
         $data = $data[0];
-        return new DatabaseResponse(200, $data, null);
+        return DataToObjectTransformer::makeExchangeRateFromData($data);
     }
 
-    public function addExchangeRate(ExchangeRate $exchangeRate): bool
+    public function addExchangeRate(ExchangeRate $exchangeRate): void
     {
         $baseCurrencyId = $exchangeRate->getBaseCurrencyId();
         $targetCurrencyId = $exchangeRate->getTargetCurrencyId();
@@ -149,10 +119,9 @@ class DatabaseAction
             'targetCurrencyId' => $targetCurrencyId,
             'rate' => $rate
         ]);
-        return true;
     }
 
-    public function patchExchangeRate(ExchangeRate $exchangeRate): DatabaseResponse
+    public function patchExchangeRate(ExchangeRate $exchangeRate): void
     {
         $exchangeRateId = $exchangeRate->getId();
         $newRate = $exchangeRate->getRate();
@@ -164,6 +133,5 @@ class DatabaseAction
             'newRate' => $newRate,
             'exchangeRateId' => $exchangeRateId
         ]);
-        return new DatabaseResponse(200);
     }
 }
