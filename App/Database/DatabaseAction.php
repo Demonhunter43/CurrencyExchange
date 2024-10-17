@@ -17,7 +17,8 @@ class DatabaseAction
     public function getAllCurrencies(): array
     {
         $sql = "SELECT * FROM `currencies`";
-        $stmt = $this->connection->getPdo()->query($sql);
+        $stmt = $this->connection->getPdo()->prepare($sql);
+        $stmt->execute();
         return DataToObjectTransformer::makeCurrenciesArrayFromData($stmt->fetchAll(\PDO::FETCH_ASSOC));
     }
 
@@ -33,7 +34,7 @@ class DatabaseAction
         if (count($data) == 0) {
             throw new \Exception("Wrong code");
         }
-        return DataToObjectTransformer::makeCurrencyFromData($data);
+        return DataToObjectTransformer::makeCurrencyFromData($data[0]);
     }
 
     public function addCurrency(Currency $currency): void
@@ -69,7 +70,8 @@ class DatabaseAction
                 ON BaseCurrency.ID = exchangerates.BaseCurrencyID    
                 JOIN `currencies` AS TargetCurrency
                 ON TargetCurrency.ID = exchangerates.TargetCurrencyID;";
-        $stmt = $this->connection->getPdo()->query($sql);
+        $stmt = $this->connection->getPdo()->prepare($sql);
+        $stmt->execute();
         $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
         return DataToObjectTransformer::makeExchangeRatesArrayFromData($data);
     }

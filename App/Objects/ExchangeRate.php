@@ -2,7 +2,7 @@
 
 namespace App\Objects;
 
-class ExchangeRate  implements \JsonSerializable
+class ExchangeRate implements \JsonSerializable
 {
 
     private ?int $id;
@@ -28,29 +28,14 @@ class ExchangeRate  implements \JsonSerializable
         return $this->id;
     }
 
-    public function setId(int $id): void
-    {
-        $this->id = $id;
-    }
-
     public function getBaseCurrencyId(): int
     {
         return $this->baseCurrencyId;
     }
 
-    public function setBaseCurrencyId(int $baseCurrencyId): void
-    {
-        $this->baseCurrencyId = $baseCurrencyId;
-    }
-
     public function getTargetCurrencyId(): int
     {
         return $this->targetCurrencyId;
-    }
-
-    public function setTargetCurrencyId(int $targetCurrencyId): void
-    {
-        $this->targetCurrencyId = $targetCurrencyId;
     }
 
     public function getRate(): float
@@ -61,12 +46,6 @@ class ExchangeRate  implements \JsonSerializable
     public function setRate(float $rate): void
     {
         $this->rate = $rate;
-    }
-
-    public function initializeCurrencies(Currency $baseCurrency, Currency $targetCurrency): void
-    {
-        $this->baseCurrency = $baseCurrency;
-        $this->targetCurrency = $targetCurrency;
     }
 
     public function jsonSerialize(): array

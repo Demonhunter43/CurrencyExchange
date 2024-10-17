@@ -2,7 +2,7 @@
 
 namespace App\Objects;
 
-class Exchange  implements \JsonSerializable
+class Exchange implements \JsonSerializable
 {
     private Currency $baseCurrency;
     private Currency $targetCurrency;
@@ -10,10 +10,6 @@ class Exchange  implements \JsonSerializable
     private float $amount;
     private float $convertedAmount;
 
-    public function getBaseCurrency(): Currency
-    {
-        return $this->baseCurrency;
-    }
 
     public function getTargetCurrency(): Currency
     {
@@ -36,8 +32,9 @@ class Exchange  implements \JsonSerializable
 
     public function convert(): void
     {
-        $this->convertedAmount = $this->amount * $this->rate;
+        $this->convertedAmount = round($this->amount * $this->rate, 7);
     }
+
     public function jsonSerialize(): array
     {
         return [
