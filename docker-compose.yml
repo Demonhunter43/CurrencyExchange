@@ -1,0 +1,13 @@
+services:
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./:/var/www/
+      - ./nginx/conf.d/:/etc/nginx/conf.d/
+    ports:
+      - "8876:80"
+    container_name: CurrencyExchange_nginx
+  php:
+    image: php:8.2-fpm
+    volumes:
+      - ./:/var/www/

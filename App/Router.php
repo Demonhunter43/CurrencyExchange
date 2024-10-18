@@ -20,8 +20,8 @@ class Router
 
     public function __construct()
     {
-        if (array_key_exists('q', $_GET)) {
-            $this->q = $_GET['q'];
+        if (array_key_exists('REQUEST_URI', $_SERVER)) {
+            $this->q = substr($_SERVER['REQUEST_URI'], 1);
         } else {
             $this->q = null;
         }
