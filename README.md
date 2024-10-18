@@ -249,8 +249,8 @@ GET /exchange?from=BASE_CURRENCY_CODE&to=TARGET_CURRENCY_CODE&amount=$AMOUNT #
 ```
 
 Значение message зависит от того, какая именно ошибка произошла.
-## Local launch
-1) Apache server (XAMPP)
-2) Composer
-3) Server needs to support SQLite
-4) Move source code to folder
+## Local run
+1) Install docker.
+2) run command: "docker-compose up -d" in directory with project.
+3) Install composer in this running container using official DOCs.
+4) Project will be available with this URL: "http://localhost:8876/".
