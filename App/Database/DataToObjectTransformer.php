@@ -7,35 +7,24 @@ use App\Objects\ExchangeRate;
 
 class DataToObjectTransformer
 {
-    static function makeCurrenciesArrayFromData($data): array
+    static function makeObjectsArray($data): array
     {
         $i = 0;
-        foreach ($data as $currency) {
-            $arrayCurrencies[$i] = DataToObjectTransformer::makeCurrencyFromData($currency);
+        foreach ($data as $objectData) {
+            $array[$i] = DataToObjectTransformer::makeObject($objectData);
             $i++;
         }
-        return $arrayCurrencies;
+        return $array;
     }
 
-    static function makeCurrencyFromData($dataCurrency): Currency
+    static function makeObject(array $dataObject): Currency|ExchangeRate
     {
-        return new Currency($dataCurrency["ID"], $dataCurrency["Code"], $dataCurrency["FullName"], $dataCurrency["Sign"]);
-    }
-
-    static function makeExchangeRatesArrayFromData($data): array
-    {
-        $i = 0;
-        foreach ($data as $dataExchangeRate) {
-            $arrayExchangeRates[$i] = DataToObjectTransformer::makeExchangeRateFromData($dataExchangeRate);
-            $i++;
+        if (array_key_exists("BaseCurrencyID", $dataObject)) {
+            $baseCurrency = new Currency($dataObject["BaseCurrencyID"], $dataObject["BaseCurrencyCode"], $dataObject["BaseCurrencyFullName"], $dataObject["BaseCurrencySign"]);
+            $targetCurrency = new Currency($dataObject["TargetCurrencyID"], $dataObject["TargetCurrencyCode"], $dataObject["TargetCurrencyFullName"], $dataObject["TargetCurrencySign"]);
+            return new ExchangeRate($dataObject["ID"], $baseCurrency, $targetCurrency, $dataObject["Rate"]);
+        } else {
+            return new Currency($dataObject["ID"], $dataObject["Code"], $dataObject["FullName"], $dataObject["Sign"]);
         }
-        return $arrayExchangeRates;
-    }
-
-    static function makeExchangeRateFromData(array $dataExchangeRate): ExchangeRate
-    {
-        $baseCurrency = new Currency($dataExchangeRate["BaseCurrencyID"],$dataExchangeRate["BaseCurrencyCode"],$dataExchangeRate["BaseCurrencyFullName"],$dataExchangeRate["BaseCurrencySign"]);
-        $targetCurrency = new Currency($dataExchangeRate["TargetCurrencyID"],$dataExchangeRate["TargetCurrencyCode"],$dataExchangeRate["TargetCurrencyFullName"],$dataExchangeRate["TargetCurrencySign"]);
-        return new ExchangeRate($dataExchangeRate["ID"],$baseCurrency, $targetCurrency, $dataExchangeRate["Rate"]);
     }
 }

@@ -19,7 +19,7 @@ class DatabaseAction
         $sql = "SELECT * FROM `currencies`";
         $stmt = $this->connection->getPdo()->prepare($sql);
         $stmt->execute();
-        return DataToObjectTransformer::makeCurrenciesArrayFromData($stmt->fetchAll(\PDO::FETCH_ASSOC));
+        return DataToObjectTransformer::makeObjectsArray($stmt->fetchAll(\PDO::FETCH_ASSOC));
     }
 
     public function getCurrencyByCode($code): Currency
@@ -34,7 +34,7 @@ class DatabaseAction
         if (count($data) == 0) {
             throw new \Exception("Wrong code");
         }
-        return DataToObjectTransformer::makeCurrencyFromData($data[0]);
+        return DataToObjectTransformer::makeObject($data[0]);
     }
 
     public function addCurrency(Currency $currency): void
@@ -73,7 +73,7 @@ class DatabaseAction
         $stmt = $this->connection->getPdo()->prepare($sql);
         $stmt->execute();
         $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        return DataToObjectTransformer::makeExchangeRatesArrayFromData($data);
+        return DataToObjectTransformer::makeObjectsArray($data);
     }
 
     public function getExchangeRateByCurrenciesCodes(string $baseCurrencyCode, string $targetCurrencyCode): ExchangeRate
@@ -104,7 +104,7 @@ class DatabaseAction
             throw new \Exception("No pair {$baseCurrencyCode}{$targetCurrencyCode} in database");
         }
         $data = $data[0];
-        return DataToObjectTransformer::makeExchangeRateFromData($data);
+        return DataToObjectTransformer::makeObject($data);
     }
 
     public function addExchangeRate(ExchangeRate $exchangeRate): void
